@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Comprehension Trainer</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --radius: 8px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+        }
+
+        #main-div {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--surface);
+            max-width: 650px;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        #status {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            min-height: 1.5em;
+            text-transform: capitalize;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+            flex: 1;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        #context, #question {
+            background-color: #f9fafb;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            user-select: none; 
+        }
+
+        #context:empty, #question:empty, #answer:empty {
+            display: none;
+        }
+
+        #question {
+            font-weight: 600;
+            border-left: 4px solid var(--primary);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        #answer {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        /* Dynamic Evaluation Styles */
+        #answer.correct {
+            background-color: #ecfdf5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+
+        #answer.incorrect {
+            background-color: #fef2f2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+
+        #answer.neutral {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem 2rem 1rem; 
+            background-color: var(--bg-color);
+        }
+
+        #footer-container {
+            background-color: var(--surface);
+            max-width: 650px;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .topic-input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .topic-input-group input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .topic-input-group button {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .topic-input-group {
+                flex-direction: column;
+            }
+            .topic-input-group button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-div">
+        <div class="container">
+            <h1>AI Comprehension Trainer</h1>
+            
+            <div id="status">Initializing model...</div>
+            
+            <div class="button-group">
+                <button onclick="generateText()" id="generate">Generate New Exercise</button>
+            </div>
+
+            <div id="context"></div>
+            <div id="question"></div>
+
+            <form id="form">
+                <div class="input-group">
+                    <label for="your-answer">Your Answer</label>
+                    <input type="text" id="your-answer" minlength="5" maxlength="100" placeholder="Type your answer here..." autocomplete="off" required>
+                </div>
+
+                <button type="submit" id="post" style="width: 100%;">Check Answer</button>
+            </form>
+            
+            <div id="answer"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div id="footer-container">
+            <div class="footer-title">Add Your Own Topics</div>
+            <div class="topic-input-group">
+                <input type="text" id="new-topic" placeholder="e.g., The history of the Apollo 11 moon landing" autocomplete="off">
+                <button id="submit-new-topic" onclick="submitNewTopic()">Add Topic</button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // just examples
+        const comprehensionTopics = [
+            "The lifecycle of a butterfly",
+            "How ancient Egyptians built the pyramids",
+            "The invention of the first computer",
+            "Why leaves change color in autumn",
+            "The history of the Olympic Games",
+            "How solar panels generate electricity",
+            "The role of bees in our ecosystem",
+            "A brief biography of Marie Curie",
+            "The causes and effects of ocean tides",
+            "Differences between renewable and non-renewable energy",
+            "How the human digestive system works",
+            "The discovery of penicillin",
+            "The history and impact of the printing press",
+            "How black holes are formed in space",
+            "The mysteries of the deep ocean trenches",
+            "The incredible migration patterns of monarch butterflies",
+            "How the Great Wall of China was built",
+            "The science behind earthquakes and volcanoes",
+            "The cultural significance of the Renaissance period",
+            "The invention of the Internet and its evolution",
+            "How the human immune system fights off viruses",
+            "The life and achievements of Leonardo da Vinci",
+            "The environmental impact of plastic pollution",
+            "The discovery of DNA and its role in genetics",
+            "How artificial intelligence is changing modern healthcare",
+            "The history of the Apollo 11 moon landing",
+            "The role of coral reefs in ocean ecosystems",
+            "The origins and evolution of the English language",
+            "The unique biodiversity of the Amazon Rainforest",
+            "The life of Amelia Earhart and her aviation records",
+            "How sound waves travel and are processed by the human ear",
+            "The history of chocolate from ancient Mesoamerica to today",
+            "The science of sleep and why we dream",
+            "The history and training of the Japanese samurai",
+            "How photosynthesis powers the plant kingdom",
+            "The discovery and exploration of the Titanic wreck",
+            "Life aboard the International Space Station",
+            "How echolocation helps bats and dolphins navigate",
+            "The engineering marvel of ancient Roman aqueducts",
+            "The life cycle of stars from nebula to supernova",
+            "The global impact of the Industrial Revolution",
+            "How vaccines were developed and protect the body",
+            "The history and evolution of video game design",
+            "The search for extraterrestrial life and exoplanets",
+            "How deep-sea exploration submarines are built",
+            "The psychology behind why we enjoy scary movies",
+            "The impact of the fast fashion industry on the environment",
+            "The deciphering of the Rosetta Stone and ancient languages",
+            "How the brain stores and retrieves long-term memories",
+            "The role of fungi and mycelium networks in forests",
+            "The history of cryptography and secret codes",
+            "The science of aerodynamics in Formula 1 racing"
+
+        ];
+
+        const status = document.getElementById('status');
+        const newTopicInput = document.getElementById('new-topic');
+        const submitNewTopicBtn = document.getElementById('submit-new-topic');
+        const output = document.getElementById('answer');
+        const userAnswer = document.getElementById('your-answer');
+        const context = document.getElementById('context');
+        const question = document.getElementById('question');
+        const postBtn = document.getElementById('post');
+        const generateBtn = document.getElementById('generate')
+        const model = new Worker('worker.js', {type: "module"});
+
+        document.getElementById('form').addEventListener('submit', (e) => {
+            // stop form refreshing page
+            e.preventDefault();
+            
+            post();
+        });
+
+        postBtn.disabled = true;
+        generateBtn.disabled = true;
+
+        let generatedText, generatedQuestion;
+
+        newTopicInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                submitNewTopic();
+            }
+        });
+
+        function submitNewTopic(){
+            const newTopic = newTopicInput.value;
+            if(!newTopic) return;
+            comprehensionTopics.push(newTopic);
+            newTopicInput.value = '';
+        }
+
+        function generateText(){
+            model.postMessage({action: 'generateText', topic: comprehensionTopics[Math.floor(Math.random() * comprehensionTopics.length)]});
+            
+            // Reset output UI state
+            output.textContent = '';
+            output.className = ''; 
+            userAnswer.value = '';
+            context.textContent = '';
+            question.textContent = '';
+        }
+
+        function post(){
+            if(userAnswer.value.trim()){
+                model.postMessage({text: generatedText, question: generatedQuestion, userAnswer: userAnswer.value, action: 'answer'});
+            } else {
+                status.textContent = 'Please enter an answer';
+                userAnswer.focus();
+            }
+        }
+
+        userAnswer.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !postBtn.disabled) {
+                post();
+            }
+        });
+
+        model.onmessage = (e) => {
+            if(e.data.status){
+                status.textContent = e.data.status;
+                switch(e.data.status){
+                    case 'ready':
+                        generateBtn.disabled = false;
+                        status.textContent = 'Ready! Click to generate an exercise.';
+                        break;
+                    case 'generating text':
+                    case 'generating answer':
+                        postBtn.disabled = true;
+                        generateBtn.disabled = true;
+                        submitNewTopic.disabled = true;
+                        break;
+                    case 'text generated':
+                        generatedText = e.data.output;
+                        context.textContent = generatedText;
+                        break;
+                    case 'question generated':
+                        generatedQuestion = e.data.question;
+                        question.textContent = generatedQuestion;
+                        postBtn.disabled = false;
+                        generateBtn.disabled = false;
+                        submitNewTopicBtn.disabled = false;
+                        status.textContent = 'Waiting for your answer...';
+                        break;
+                    case 'done':
+                        generateBtn.disabled = false;
+                        break;
+                }
+            } else {
+                // Clear any previous class
+                output.className = ''; 
+
+                // Check for "INCORRECT" first, as "INCORRECT" contains "CORRECT"
+                if (e.data.judging.includes('INCORRECT')) {
+                    output.classList.add('incorrect');
+                } else if (e.data.judging.includes('CORRECT')) {
+                    output.classList.add('correct');
+                } else {
+                    output.classList.add('neutral');
+                }
+
+                output.innerHTML = `
+                    <strong>Model Answer:</strong> ${e.data.answer}<br><br>
+                    <strong>Evaluation:</strong> ${e.data.judging}
+                `;
+            }
+        }; 
+    </script>
+</body>
+</html>
