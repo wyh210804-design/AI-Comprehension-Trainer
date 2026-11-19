@@ -61,7 +61,7 @@ self.onmessage = async (e) => {
             },
             { 
                 role: 'user', 
-                content: `Passage: ${data.text} Question: ${data.question}\nRespond to the user\'s question directly using information from the user\'s passage.` 
+                content: `Passage: ${data.text} Question: ${data.question}\nRespond to the user\'s question concisely and directly using information from the user\'s passage.` 
             }
         ];
         const output = await generator(messages, {
